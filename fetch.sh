@@ -1,27 +1,15 @@
 #!/bin/bash
 set -e
-
+: "${FUZZER:=/magma/fuzzers/sievefuzz}"
 export FUZZER="$FUZZER/repo"
-
-echo "[*] Building SieveFuzz…"
-pushd "$FUZZER" >/dev/null
-./build.sh || echo "    → ignoring SVF test failures"
+echo "[*] Cloning SieveFuzz into $FUZZER..."
+git clone --depth 1 https://github.com/HexHive/SieveFuzz.git "$FUZZER"
+echo "[*] Stripping sudo from setup script..."
+sed -i ’s/^sudo //g’ "$FUZZER/eval/setup_fuzzer_env.sh"
+echo "[*] Running fuzzer runtime setup (no sudo)..."
+pushd "$FUZZER/eval" >/dev/null
+./setup_fuzzer_env.sh
 popd >/dev/null
 
-echo "[*] Copying gllvm_bins…"
-mkdir -p "$FUZZER/third_party/SVF/Release-build/bin"
-cp "$FUZZER/gllvm_bins/"* "$FUZZER/third_party/SVF/Release-build/bin/"
 
-echo "[*] Patching helper scripts under eval/…"
-for script in prep_target.sh get_sample_target.sh sanitycheck_run.sh; do
-  SCRIPT_PATH="$FUZZER/eval/$script"
-  if [[ -f "$SCRIPT_PATH" ]]; then
-    sed -i "s|^ROOT=.*|ROOT=\"$FUZZER\"|"         "$SCRIPT_PATH"
-    sed -i "s|^TARGET_DIR=.*|TARGET_DIR=\"$FUZZER\"|" "$SCRIPT_PATH"
-    sed -i "s|^OUTDIR=.*|OUTDIR=\"$FUZZER\"|"     "$SCRIPT_PATH"
-    sed -i "s|^DATA=.*|DATA=\"$FUZZER\"|"         "$SCRIPT_PATH"
-    echo "    → patched $script"
-  fi
-done
-
-echo "[✓] build.sh complete."
+echo "fetch.sh complete."
