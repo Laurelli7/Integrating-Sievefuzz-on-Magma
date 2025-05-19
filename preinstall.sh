@@ -6,6 +6,7 @@ sudo apt update
 
 # Install necessary apt packages
 sudo apt install -y \
+    libc6-dev\
     nano\
     zlib1g-dev\
     silversearcher-ag \
