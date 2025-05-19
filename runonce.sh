@@ -17,4 +17,3 @@ fi
 
 timeout -s KILL --preserve-status $TIMELIMIT bash -c \
     "run_limited '$OUT/sievefuzz/$PROGRAM' $args"
-
